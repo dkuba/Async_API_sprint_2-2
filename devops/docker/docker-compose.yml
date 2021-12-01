@@ -1,0 +1,111 @@
+version: "3.9"
+
+networks:
+  yp_network:
+    driver: bridge
+
+volumes:
+  yp_postgres_data:
+  yp_static_volume:
+  yp_redis_data:
+  yp_elastic_data:
+
+services:
+  db:
+    build:
+      context: https://github.com/merkushov/Admin_panel_sprint_2.git#main:services/postgresql
+      dockerfile: Dockerfile
+    container_name: yp_db
+    restart: always
+    env_file:
+      - ../../devops/db/.env
+    volumes:
+      - yp_postgres_data:/var/lib/postgresql/data
+    networks:
+      - yp_network
+
+  app:
+    build:
+      context: https://github.com/merkushov/Admin_panel_sprint_2.git#main:movies_admin
+      dockerfile: Dockerfile.prod
+    container_name: yp_admin
+    restart: always
+    env_file:
+      - ../../devops/app/.env
+    volumes:
+      - yp_static_volume:/usr/src/app/static
+    depends_on:
+      - db
+    networks:
+      - yp_network
+
+  nginx:
+    build:
+      context: https://github.com/merkushov/Admin_panel_sprint_2.git#main:services/nginx
+      dockerfile: Dockerfile.prod
+    container_name: yp_nginx
+    volumes:
+      - yp_static_volume:/usr/src/app/static
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    networks:
+      - yp_network
+
+  api:
+    build:
+      context: ../../
+      dockerfile: devops/docker/api/Dockerfile
+      target: develop
+    container_name: yp_api
+    user: "fastapi"
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../../devops/api/.env
+    depends_on:
+      - es
+      - redis
+    networks:
+      - yp_network
+
+  es:
+    image: elasticsearch:7.14.0
+    container_name: yp_elastic
+    environment:
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - yp_elastic_data:/usr/share/elsticsearch/data
+    networks:
+      - yp_network
+
+  redis:
+    image: redis:6.2.5-alpine
+    container_name: yp_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - yp_redis_data:/data
+    networks:
+      - yp_network
+
+  etl:
+    build:
+      context: https://github.com/merkushov/ETL.git#main:postgres_to_es
+      dockerfile: Dockerfile
+    container_name: yp_etl
+    user: "devuser"
+    command: ["python3", "etl.py"]
+    env_file:
+      - ../../devops/etl/.env
+    restart: always
+    depends_on:
+      - db
+      - es
+    networks:
+      - yp_network

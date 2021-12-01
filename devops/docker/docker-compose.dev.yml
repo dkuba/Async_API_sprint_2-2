@@ -1,0 +1,28 @@
+version: "3.9"
+
+secrets:
+  develop_host_ssh_key:
+    file: ${HOME}/.ssh/github_rsa
+  gitconfig:
+    file: ${HOME}/.gitconfig
+
+services:
+  api:
+    build:
+      args:
+        uid: ${HOST_UID}
+        gid: ${HOST_GID}
+    command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--reload", "main:app"]
+    volumes:
+      - ../../:/usr/src/app
+    secrets:
+      - source: develop_host_ssh_key
+        target: /home/fastapi/.ssh/id_rsa
+      - source: gitconfig
+        target: /home/fastapi/.gitconfig
+
+  etl:
+    build:
+      args:
+        uid: ${HOST_UID}
+        gid: ${HOST_GID}
