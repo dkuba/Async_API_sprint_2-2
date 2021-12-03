@@ -1,5 +1,3 @@
-# include ../.env
-
 ifndef VERBOSE
 .SILENT:
 endif
@@ -51,11 +49,11 @@ env_setup:	## настроить переменные окружения
 .PHONY: env_setup
 
 docker/build:	## build the environment
-	$(DOCKER_COMPOSE) --env-file ../.env build --force-rm
+	$(DOCKER_COMPOSE) --env-file ../.env build
 .PHONY: docker/build
 
 docker/start:	## поднять Докер
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) --env-file ../.env up -d
 .PHONY: docker/start
 
 # alias for docker/start
