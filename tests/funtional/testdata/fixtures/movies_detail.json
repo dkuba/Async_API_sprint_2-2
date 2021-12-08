@@ -1,24 +1,26 @@
 {    
-    "id": "a801e84c-316a-4c0c-a5a5-cc024234b2cb",
-    "title": "Kre-O Star Trek",
-    "description": "A stop-motion animated story about 'Star Trek' featuring Kre-O toy blocks.",
-    "imdb_rating": 6.5,
+    "id": "58756c5b-fde4-4a1c-8e3b-f355634dd9a5",
+    "title": "New Film",
+    "description": "Test",
+    "imdb_rating": 5.1,
     "type": "film",
     "genres": [
       {
-        "id": "6a0a479b-cfec-41ac-b520-41b2b007b611",
-        "name": "Animation"
+        "id": "fd8f0e66-87d6-46f9-883c-1ab78861db2b",
+        "name": "Genre 1"
       },
       {
-        "id": "a886d0ec-c3f3-4b16-b973-dedcf5bfa395",
-        "name": "Short"
+        "id": "59125c17-a897-4574-a621-5f5c815d6c20",
+        "name": "Genre 2"
       }
     ],
-    "directors": [],    
-    "actors": [],    
-    "writers": [],    
-    "actors_names": [],    
-    "writers_names": [],    
-    "directors_names": []
+    "directors": [
+      {
+        "id": "829e6d0c-51ab-404e-8dbe-38ae82000fda",
+        "name": "Name 1"
+      }
+    ],
+    "actors": [],
+    "writers": []
   }
   

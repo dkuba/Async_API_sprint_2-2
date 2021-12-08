@@ -3,54 +3,49 @@ import json
 from elasticsearch import AsyncElasticsearch
 from settings import settings
 
+
 class ESHelper:
     def __init__(self) -> None:
         self.client = AsyncElasticsearch(hosts=settings.ES.get_dsl)
 
-        # self._movies_index_name = f"test_movies_{self._instance_key}"
-        self._movies_index_name = "movies"
+        self._indices = ("movies", "genres", "persons")
 
     def get_client(self) -> AsyncElasticsearch:
         return self.client
 
-    # def delete_movies_test_index(self):
-    #     self.client.indices.delete(self._movies_index_name)
-
     async def init_indices(self):
-        indices = ("movies", "genres", "persons")
-
-        for index_name in indices:
-            if not self.client.indices.exists(index_name):
+        for index_name in self._indices:
+            if not await self.client.indices.exists(index_name):
                 with open(f"testdata/es_indexes/{index_name}.json") as file:
                     es_index_data = json.load(file)
 
-                await self.client.indices.create(self._movies_index_name, body=es_index_data)
+                await self.client.indices.create(index_name, body=es_index_data)
 
-    # async def create_movies_test_index(self):
-    #     print("=== OK === ")
+    async def delete_indices(self):
+        for index_name in self._indices:
+            await self.client.indices.delete(index_name, ignore=[400, 404])
 
-    #     with open("testdata/es_indexes/movies.json") as file:
-    #         es_index_data = json.load(file)
-
-    #     await self.client.indices.create(self._movies_index_name, body=es_index_data)
-
-    # def create_genres_test_index(self):
-    #     pass
-
-    # def create_persons_test_index(self):
-    #     pass
-
-    async def fill_in(self, fixture: str):
-        with open(f"testdata/fixtures/{fixture}") as file:
+    def read_file(self, file_name: str):
+        with open(f"testdata/fixtures/{file_name}") as file:
             data = json.load(file)
 
-        body = "\n" + json.dumps({"index": {"_index": self._movies_index_name, "_id": data["id"]}}) + "\n" + json.dumps(data) + "\n"
+        return data
 
-        await self.client.bulk(body, index=self._movies_index_name)
+    async def fill_in(self, fixture: str, index_name: str):
+        data = self.read_file(fixture)
 
-    async def clear_out(self, fixture: str):
-        with open(f"testdata/fixtures/{fixture}") as file:
-            data = json.load(file)
+        body = (
+            "\n"
+            + json.dumps({"index": {"_index": index_name, "_id": data["id"]}})
+            + "\n"
+            + json.dumps(data)
+            + "\n"
+        )
+
+        await self.client.bulk(body, index=index_name)
+
+    async def clear_out(self, fixture: str, index_name: str):
+        data = self.read_file(fixture)
 
         if isinstance(data, dict):
             data = [data]
@@ -60,13 +55,4 @@ class ESHelper:
             data = []
 
         for item in data:
-            print(" == delete " + item["id"])
-            self.client.delete(self._movies_index_name, item["id"])
-            # self.client.indices.delete(self._movies_index_name, item["id"], refresh=True)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exct_type, exce_value, traceback):
-        # self.delete_movies_test_index()
-        self.client.close()
+            await self.client.delete(index_name, item["id"])

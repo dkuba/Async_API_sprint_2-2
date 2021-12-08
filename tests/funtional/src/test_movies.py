@@ -1,23 +1,27 @@
+import uuid
+from typing import Callable
+
 import pytest
 
 
+@pytest.mark.usefixtures("data_setup")
+@pytest.mark.data_setup_params("movies", "movies_detail.json")
 @pytest.mark.asyncio
-async def test_search_detailed(es_client, make_get_request):
-    await es_client.fill_in(fixture="movies_detail.json")
+class TestMoviesDetail:
+    async def test_success(self, make_get_request: Callable, uploaded_data):
+        response = await make_get_request(
+            "/film/{uuid}".format(uuid=uploaded_data["id"]), {}
+        )
 
-    response = await make_get_request("/film/a801e84c-316a-4c0c-a5a5-cc024234b2cb", {})
+        assert response.status == 200
+        assert response.body["uuid"] == uploaded_data["id"]
+        assert len(response.body["genres"]) == 2
+        assert len(response.body["directors"]) == 1
+        assert len(response.body["actors"]) == 0
+        assert len(response.body["writers"]) == 0
 
-    # print(response.body)
+    async def test_not_found(self, make_get_request: Callable):
+        response = await make_get_request("/film/{uuid}".format(uuid=uuid.uuid4()))
 
-    # Заполнение данных для теста
-
-    # # Выполнение запроса
-    # response = await make_get_request('/search', {'search': 'Star Wars'})
-    
-    # Проверка результата
-    assert response.status == 200
-    assert response.body["uuid"] == "a801e84c-316a-4c0c-a5a5-cc024234b2cb"
-
-    # # assert response.body == expected
-
-    await es_client.clear_out(fixture="movies_detail.json")
+        assert response.status == 404
+        assert response.body == {"detail": "movie not found"}
