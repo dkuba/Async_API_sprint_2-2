@@ -42,7 +42,7 @@ async def movie_list(
 
     filters = []
     if filter_genre_id:
-        filters.append({"field": "genre.id", "value": str(filter_genre_id)})
+        filters.append({"path": "genres", "field": "genres.id", "value": str(filter_genre_id)})
 
     sort = {}
     if sort_param:

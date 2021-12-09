@@ -67,9 +67,20 @@ class MovieService:
         if query:
             request_query = {"multi_match": {"query": query, "fields": ["title"]}}
         elif filters:
-            request_query.setdefault("match", {})
+            request_filters = []
             for filter in filters:
-                request_query["match"].setdefault(filter["field"], filter["value"])
+                request_filters.append({"term":{filter["field"]: filter["value"]}})
+
+            request_query = {
+                "nested": {
+                    "path": "genres",
+                    "query": {
+                        "bool": {
+                            "must": request_filters
+                        }
+                    }
+                }
+            }
         else:
             request_query = {"match_all": {}}
 
