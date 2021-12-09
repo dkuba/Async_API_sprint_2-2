@@ -21,8 +21,8 @@ services:
       - source: gitconfig
         target: /home/fastapi/.gitconfig
 
-  # etl:
-  #   build:
-  #     args:
-  #       uid: ${HOST_UID}
-  #       gid: ${HOST_GID}
+  etl:
+    build:
+      args:
+        uid: ${HOST_UID}
+        gid: ${HOST_GID}
