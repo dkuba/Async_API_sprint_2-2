@@ -34,15 +34,21 @@ class ESHelper:
     async def fill_in(self, fixture: str, index_name: str):
         data = self.read_file(fixture)
 
-        body = (
-            "\n"
-            + json.dumps({"index": {"_index": index_name, "_id": data["id"]}})
-            + "\n"
-            + json.dumps(data)
-            + "\n"
-        )
+        if data:
+            if isinstance(data, dict):
+                data = [data]
 
-        await self.client.bulk(body, index=index_name)
+            body = ""
+            for item in data:
+                body = body + (
+                    "\n"
+                    + json.dumps({"index": {"_index": index_name, "_id": item["id"]}})
+                    + "\n"
+                    + json.dumps(item)
+                    + "\n"
+                )
+
+            await self.client.bulk(body, index=index_name, refresh=True)
 
     async def clear_out(self, fixture: str, index_name: str):
         data = self.read_file(fixture)
@@ -55,4 +61,4 @@ class ESHelper:
             data = []
 
         for item in data:
-            await self.client.delete(index_name, item["id"])
+            await self.client.delete(index_name, item["id"], refresh=True)
