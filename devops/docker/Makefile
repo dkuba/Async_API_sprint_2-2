@@ -212,5 +212,5 @@ test/redis_waiting_for_readiness:	## ожидать готовности Redis
 .PHONY: test/redis_waiting_for_readiness
 
 test/run:	## запустить функциональные тесты API
-	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_API_TEST) bash -c 'PYTHONPATH=. pytest -rP .'
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_API_TEST) bash -c 'cd /usr/src/app_tests/functional/ && PYTHONPATH=. pytest .'
 .PHONY: test/run

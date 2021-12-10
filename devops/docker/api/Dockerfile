@@ -18,7 +18,7 @@ ENV PATH="/home/${USER}/.local/bin:${PATH}"
 
 RUN mkdir ${APP_HOME}
 RUN mkdir ${APP_REQUIREMENTS}
-WORKDIR ${APP_HOME}/src
+WORKDIR ${APP_HOME}
 
 # Create an unpribileged user
 RUN groupadd -g $gid ${GROUP} && \
@@ -26,23 +26,24 @@ RUN groupadd -g $gid ${GROUP} && \
     mkdir ${HOMEDIR} && \
     chown -R ${USER}:${GROUP} ${HOMEDIR}
 
-COPY devops/api/requirements ${APP_REQUIREMENTS}
+COPY --chown=${USER}:${USER} devops/api/requirements ${APP_REQUIREMENTS}
 
 USER ${USER}
 
 RUN /usr/local/bin/python -m pip install --upgrade pip
+RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/base.txt"
 
 # -----------------------------------------------------------------------------
 # production environment
 # -----------------------------------------------------------------------------
 
-# FROM base AS production
+FROM base AS production
 
-# USER ${USER}
+USER ${USER}
 
-# COPY src ${APP_HOME}
+COPY --chown=${USER}:${USER} src ${APP_HOME}
 
-# RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/prod.txt"
+RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/prod.txt"
 
 # -----------------------------------------------------------------------------
 # functional tests environment
@@ -53,8 +54,6 @@ FROM base AS test
 USER root
 
 RUN mkdir ${APP_TEST}
-
-WORKDIR ${APP_TEST}/functional
 
 COPY --chown=${USER}:${USER} src ${APP_HOME}
 COPY --chown=${USER}:${USER} tests ${APP_TEST}
@@ -67,16 +66,18 @@ RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/test.txt"
 # development environment
 # -----------------------------------------------------------------------------
 
-# FROM base AS develop
+FROM base AS develop
 
-# USER root
+USER root
 
-# RUN apt-get install -y vim make curl git tree jq
+WORKDIR ${APP_HOME}/src
 
-# USER ${USER}
+RUN apt-get install -y vim make curl git tree jq
 
-# RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/dev.txt"
+USER ${USER}
 
-# # Fording local host users ssh keys to access the repository.
-# # SSH key is forwarded through Docker-compose as a Secret.
-# RUN mkdir -m 700 ${HOMEDIR}/.ssh
+RUN /usr/local/bin/python -m pip install -r "${APP_REQUIREMENTS}/dev.txt"
+
+# Fording local host users ssh keys to access the repository.
+# SSH key is forwarded through Docker-compose as a Secret.
+RUN mkdir -m 700 ${HOMEDIR}/.ssh
