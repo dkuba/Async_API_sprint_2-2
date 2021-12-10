@@ -1,0 +1,52 @@
+version: "3.9"
+
+networks:
+  yp_test_network:
+    driver: bridge
+
+volumes:
+  yp_test_redis_data:
+  yp_test_elastic_data:
+
+services:
+  test_api:
+    build:
+      context: ../../
+      dockerfile: devops/docker/api/Dockerfile
+      target: test
+    container_name: yp_test_api
+    user: "fastapi"
+    command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "--reload", "main:app"]
+    # command: tail -f /dev/null
+    env_file:
+      - ../../devops/api/.env
+    depends_on:
+      - test_es
+      - test_redis
+    networks:
+      - yp_test_network
+
+  test_es:
+    image: elasticsearch:7.14.0
+    container_name: yp_test_elastic
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - yp_test_elastic_data:/usr/share/elsticsearch/data
+    networks:
+      - yp_test_network
+
+  test_redis:
+    image: redis:6.2.5-alpine
+    container_name: yp_test_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - yp_test_redis_data:/data
+    networks:
+      - yp_test_network

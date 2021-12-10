@@ -9,6 +9,7 @@ DOCKER_COMPOSE_FILE=-f docker-compose.dev.yml
 endif
 
 DOCKER_COMPOSE=docker-compose -f docker-compose.yml $(DOCKER_COMPOSE_FILE)
+DOCKER_COMPOSE_TEST=docker-compose -f docker-compose.test.yml
 
 # имя контейнеров в docker-compose
 DOCKER_APP=app
@@ -17,6 +18,10 @@ DOCKER_API=api
 DOCKER_NGINX=nginx
 DOCKER_ETL=etl
 DOCKER_ES=es
+
+DOCKER_API_TEST=test_api
+DOCKER_ES_TEST=test_es
+DOCKER_REDIS_TEST=test_redis
 
 .DEFAULT_GOAL := help
 
@@ -177,3 +182,35 @@ api/bash:	## доступ к контейнеру с FastAPI
 api/log:	## посмотреть логи контейнера на хостовой машине
 	$(DOCKER_COMPOSE) logs --follow $(DOCKER_API)
 .PHONY: api/logs
+
+#
+# Функкциональное тестирование
+#
+
+env_test_setup:		## настроить переменные окружения для тестового контура
+	@cp ../api/.env.test.example ../api/.env
+.PHONY: env_setup
+
+test/destroy:		## остановить/удалить контейнеры для тестов и очистить тестовые данные
+	$(DOCKER_COMPOSE_TEST) down --volumes --remove-orphans
+.PHONY: test/setup
+
+test/build: 	## собрать тестовые контейнеры
+	$(DOCKER_COMPOSE_TEST) build
+.PHONY: test/build
+
+test/up: 	## поднять контейнеры для тестов
+	$(DOCKER_COMPOSE_TEST) up -d
+.PHONY: test/up
+
+test/es_waiting_for_readiness:	## ожидать готовности ElasticSearchh
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_ES_TEST) bash -c 'until curl --silent --output /dev/null http://localhost:9200/_cat/health?h=st; do printf "."; sleep 3; done; echo "ES ready."'
+.PHONY: test/es_waiting_for_readiness
+
+test/redis_waiting_for_readiness:	## ожидать готовности Redis
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_REDIS_TEST) sh -c 'until redis-cli -u redis://localhost:6379 ping 1>/dev/null; do printf "."; sleep 1; done; echo "Redis ready."'
+.PHONY: test/redis_waiting_for_readiness
+
+test/run:	## запустить функциональные тесты API
+	$(DOCKER_COMPOSE_TEST) exec $(DOCKER_API_TEST) bash -c 'PYTHONPATH=. pytest -rP .'
+.PHONY: test/run

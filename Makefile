@@ -41,3 +41,24 @@ dev/log:	## подсмотреть логи контейнера на хосто
 dev/stop:	## опустить инфраструктуру разработки
 	$(SUBMAKE_DEVOPS) docker/stop
 .PHONY: dev/stop
+
+#
+# Функциональные тесты
+#
+
+test/setup: 	## настройка окружения функциональных тестов
+	$(SUBMAKE_DEVOPS) env_test_setup
+	$(SUBMAKE_DEVOPS) test/destroy
+	$(SUBMAKE_DEVOPS) test/build
+	$(SUBMAKE_DEVOPS) test/up
+	$(SUBMAKE_DEVOPS) test/es_waiting_for_readiness
+	$(SUBMAKE_DEVOPS) test/redis_waiting_for_readiness
+.PHONY: test/setup
+
+test/run_functional: 	## запустить функциональные тесты
+	$(SUBMAKE_DEVOPS) test/run
+.PHONY: test/run_functional
+
+test/down: 	## остановить тесты и удалить тестовую инфраструктуру
+	$(SUBMAKE_DEVOPS) test/destroy
+.PHONY: test/run_functional
