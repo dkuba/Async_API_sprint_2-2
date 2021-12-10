@@ -17,7 +17,6 @@ class TestPersonDetail:
         assert response.body["uuid"] == uploaded_data["id"]
         assert response.body.get("full_name", None)
 
-
     async def test_not_found(self, make_get_request: Callable):
         response = await make_get_request("/person/{uuid}".format(uuid=uuid.uuid4()))
 

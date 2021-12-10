@@ -23,7 +23,9 @@ class TestPersonsList:
         assert len(response.body) == 0
 
     async def test_check_paging_page_size(self, make_get_request: Callable):
-        response = await make_get_request("/person", {"page[number]": 5, "page[size]": 5})
+        response = await make_get_request(
+            "/person", {"page[number]": 5, "page[size]": 5}
+        )
 
         assert response.status == 200
         assert len(response.body) == 5
