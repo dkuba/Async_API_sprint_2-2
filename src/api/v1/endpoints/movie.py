@@ -6,13 +6,14 @@ from pydantic import UUID4
 from api.helper.params import PaginateModel, parse_pagination
 from api.schemas import OutputMovieMinimalisticSchema, OutputMovieSchema
 from api_cache.cache import cache
+from core.config import CACHE_EXPIRE_IN_SECONDS
 from services.movie import MovieService, get_movie_service
 
 router = APIRouter()
 
 
 @router.get(path="/{movie_id:uuid}", response_model=OutputMovieSchema)
-@cache(expire=10)
+@cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def movie_details(
     movie_id: UUID4, movie_service: MovieService = Depends(get_movie_service)
 ) -> OutputMovieSchema:
@@ -29,7 +30,7 @@ async def movie_details(
 
 
 @router.get(path="/", response_model=List[OutputMovieMinimalisticSchema])
-@cache(expire=10)
+@cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def movie_list(
     filter_genre_id: Optional[UUID4] = Query(None, alias="filter[genre]"),
     sort_param: Optional[str] = Query(None, regex=r"-?imdb_rating$", alias="sort"),
@@ -42,7 +43,9 @@ async def movie_list(
 
     filters = []
     if filter_genre_id:
-        filters.append({"path": "genres", "field": "genres.id", "value": str(filter_genre_id)})
+        filters.append(
+            {"path": "genres", "field": "genres.id", "value": str(filter_genre_id)}
+        )
 
     sort = {}
     if sort_param:
@@ -63,7 +66,7 @@ async def movie_list(
 
 
 @router.get(path="/search", response_model=List[OutputMovieMinimalisticSchema])
-@cache(expire=10)
+@cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def search(
     query: str,
     pagination: PaginateModel = Depends(parse_pagination),

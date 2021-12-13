@@ -6,13 +6,14 @@ from pydantic import UUID4
 from api.helper.params import PaginateModel, parse_pagination
 from api.schemas import OutputGenreSchema
 from api_cache.cache import cache
+from core.config import CACHE_EXPIRE_IN_SECONDS
 from services.genre import GenreService, get_genre_service
 
 router = APIRouter()
 
 
 @router.get(path="/", response_model=List[OutputGenreSchema])
-@cache(expire=10)
+@cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def genre_list(
     pagination: PaginateModel = Depends(parse_pagination),
     genre_service: GenreService = Depends(get_genre_service),
@@ -29,7 +30,7 @@ async def genre_list(
     path="/{genre_id}",
     response_model=OutputGenreSchema,
 )
-@cache(expire=10)
+@cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def genre_detail(
     genre_id: UUID4, genre_service: GenreService = Depends(get_genre_service)
 ) -> OutputGenreSchema:

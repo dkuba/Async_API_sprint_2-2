@@ -22,3 +22,5 @@ ELASTIC_PORT = int(os.getenv("ELASTIC_PORT", 9200))
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
