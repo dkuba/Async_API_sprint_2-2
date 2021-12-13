@@ -10,8 +10,6 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.movie import Movie
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
-
 
 class MovieService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
@@ -22,39 +20,12 @@ class MovieService:
         """Возвращает объект фильма. Он опционален, так как фильм может
         отсутствовать в базе.
         """
-        movie = await self._movie_from_cache(movie_id)
-
-        if not movie:
-            movie = await self._get_movie_from_elastic(movie_id)
-            if not movie:
-                return None
-
-            await self._put_movie_to_cache(movie)
-
-        return movie
-
-    async def _get_movie_from_elastic(self, movie_id: str) -> Optional[Movie]:
         try:
             doc = await self.elastic.get("movies", movie_id)
         except elasticsearch.exceptions.NotFoundError:
             return None
 
         return Movie(**doc["_source"])
-
-    async def _movie_from_cache(self, movie_id: str) -> Optional[Movie]:
-        """Получение данных о фильме из кэша по идентификатору"""
-        data = await self.redis.get(movie_id)
-        if not data:
-            return None
-
-        movie = Movie.parse_raw(data)
-        return movie
-
-    async def _put_movie_to_cache(self, movie: Movie):
-        """Сохраняем данные о фильме, используя команду set"""
-        await self.redis.set(
-            str(movie.id), movie.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
-        )
 
     async def get_list(
         self,
@@ -69,16 +40,12 @@ class MovieService:
         elif filters:
             request_filters = []
             for filter in filters:
-                request_filters.append({"term":{filter["field"]: filter["value"]}})
+                request_filters.append({"term": {filter["field"]: filter["value"]}})
 
             request_query = {
                 "nested": {
                     "path": "genres",
-                    "query": {
-                        "bool": {
-                            "must": request_filters
-                        }
-                    }
+                    "query": {"bool": {"must": request_filters}},
                 }
             }
         else:
