@@ -12,8 +12,8 @@ class TestPersonsList:
         response = await make_get_request("/person", {})
 
         assert response.status == HTTPStatus.OK
-        assert response.body[0].get("full_name", None)
         assert len(response.body) == 30
+        assert response.body[0].get("full_name", None)
 
     async def test_check_paging_out_of_range(self, make_get_request: Callable):
         response = await make_get_request(

@@ -12,9 +12,9 @@ class TestMoviesList:
         response = await make_get_request("/film", {})
 
         assert response.status == HTTPStatus.OK
+        assert len(response.body) == 50
         assert response.body[0].get("imdb_rating", None)
         assert response.body[0].get("title", None)
-        assert len(response.body) == 50
 
     async def test_check_paging_out_of_range(self, make_get_request: Callable):
         response = await make_get_request(
