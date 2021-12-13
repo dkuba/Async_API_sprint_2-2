@@ -1,6 +1,7 @@
 import json
 
 from elasticsearch import AsyncElasticsearch
+
 from settings import settings
 
 

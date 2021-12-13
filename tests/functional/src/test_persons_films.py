@@ -1,4 +1,5 @@
 import uuid
+from http import HTTPStatus
 from typing import Callable
 
 import pytest
@@ -14,7 +15,7 @@ class TestPersonDetail:
             {},
         )
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert len(response.body) == 22
         assert response.body[0].get("uuid", None)
         assert response.body[0].get("title", None)
@@ -25,5 +26,5 @@ class TestPersonDetail:
             "/person/{uuid}/film".format(uuid=uuid.uuid4())
         )
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert len(response.body) == 0

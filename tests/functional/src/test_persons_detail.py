@@ -1,4 +1,5 @@
 import uuid
+from http import HTTPStatus
 from typing import Callable
 
 import pytest
@@ -13,12 +14,12 @@ class TestPersonDetail:
             "/person/{uuid}".format(uuid=uploaded_data["id"]), {}
         )
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert response.body["uuid"] == uploaded_data["id"]
         assert response.body.get("full_name", None)
 
     async def test_not_found(self, make_get_request: Callable):
         response = await make_get_request("/person/{uuid}".format(uuid=uuid.uuid4()))
 
-        assert response.status == 404
+        assert response.status == HTTPStatus.NOT_FOUND
         assert response.body == {"detail": "person not found"}

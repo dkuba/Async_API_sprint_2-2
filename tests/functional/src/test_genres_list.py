@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Callable
 
 import pytest
@@ -10,7 +11,7 @@ class TestGenreList:
     async def test_success(self, make_get_request: Callable):
         response = await make_get_request("/genre", {})
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert response.body[0].get("name", None)
         assert len(response.body) == 15
 
@@ -19,7 +20,7 @@ class TestGenreList:
             "/genre", {"page[number]": 2, "page[size]": 15}
         )
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert len(response.body) == 0
 
     async def test_check_paging_page_size(self, make_get_request: Callable):
@@ -27,5 +28,5 @@ class TestGenreList:
             "/genre", {"page[number]": 4, "page[size]": 3}
         )
 
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         assert len(response.body) == 3

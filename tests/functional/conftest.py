@@ -5,6 +5,7 @@ import aiohttp
 import aioredis
 import pytest
 from multidict import CIMultiDictProxy
+
 from settings import settings
 from utils.es_helper import ESHelper
 
