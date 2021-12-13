@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import UUID4
@@ -29,14 +29,14 @@ async def movie_details(
     return OutputMovieSchema.from_es_model(movie)
 
 
-@router.get(path="/", response_model=List[OutputMovieMinimalisticSchema])
+@router.get(path="/", response_model=list[OutputMovieMinimalisticSchema])
 @cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def movie_list(
     filter_genre_id: Optional[UUID4] = Query(None, alias="filter[genre]"),
     sort_param: Optional[str] = Query(None, regex=r"-?imdb_rating$", alias="sort"),
     pagination: PaginateModel = Depends(parse_pagination),
     movie_service: MovieService = Depends(get_movie_service),
-) -> List[OutputMovieMinimalisticSchema]:
+) -> list[OutputMovieMinimalisticSchema]:
     """Получить список Фильмов"""
 
     page = {"size": pagination.page_size, "number": pagination.page_number}
@@ -65,13 +65,13 @@ async def movie_list(
     return [OutputMovieMinimalisticSchema.from_es_model(movie) for movie in movies]
 
 
-@router.get(path="/search", response_model=List[OutputMovieMinimalisticSchema])
+@router.get(path="/search", response_model=list[OutputMovieMinimalisticSchema])
 @cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def search(
     query: str,
     pagination: PaginateModel = Depends(parse_pagination),
     movie_service: MovieService = Depends(get_movie_service),
-) -> List[OutputMovieMinimalisticSchema]:
+) -> list[OutputMovieMinimalisticSchema]:
     """Поиск по Фильмам"""
 
     page = {"size": pagination.page_size, "number": pagination.page_number}

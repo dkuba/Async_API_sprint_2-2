@@ -1,8 +1,6 @@
 """Классы описывающие модель данных Фильм. Данные хранятся в ElasticSearch
 """
 
-from typing import List
-
 from pydantic import UUID4
 
 from models.base import BaseElasticModel
@@ -29,7 +27,7 @@ class Movie(BaseElasticModel):
     title: str
     imdb_rating: float
     description: str
-    genres: List[Genre]
-    actors: List[Person]
-    writers: List[Person]
-    directors: List[Person]
+    genres: list[Genre]
+    actors: list[Person]
+    writers: list[Person]
+    directors: list[Person]

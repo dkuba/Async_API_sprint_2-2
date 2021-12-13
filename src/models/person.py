@@ -1,8 +1,6 @@
 """Классы описывающие модель данных Персона. Данные хранятся в ElasticSearch
 """
 
-from typing import List
-
 from pydantic import UUID4
 
 from models.base import BaseElasticModel
@@ -21,4 +19,4 @@ class Person(BaseElasticModel):
 
     id: UUID4
     full_name: str
-    movies: List[PersonMovies]
+    movies: list[PersonMovies]

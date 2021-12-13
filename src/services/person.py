@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Optional
 
 import elasticsearch.exceptions
 from aioredis import Redis
@@ -28,7 +28,7 @@ class PersonService:
         self,
         query: Optional[str] = None,
         page: Optional[dict] = None,
-    ) -> List[Person]:
+    ) -> list[Person]:
         request_query = {}
         if query:
             request_query = {"multi_match": {"query": query, "fields": ["full_name"]}}

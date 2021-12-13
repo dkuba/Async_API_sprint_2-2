@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import UUID4
 
@@ -13,12 +11,12 @@ from services.person import PersonService, get_person_service
 router = APIRouter()
 
 
-@router.get(path="/", response_model=List[OutputPersonSchema])
+@router.get(path="/", response_model=list[OutputPersonSchema])
 @cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def person_list(
     pagination: PaginateModel = Depends(parse_pagination),
     person_service: PersonService = Depends(get_person_service),
-) -> List[OutputPersonSchema]:
+) -> list[OutputPersonSchema]:
 
     persons = await person_service.get_list(
         page={"size": pagination.page_size, "number": pagination.page_number},
@@ -27,13 +25,13 @@ async def person_list(
     return [OutputPersonSchema.from_es_model(person) for person in persons]
 
 
-@router.get(path="/search", response_model=List[OutputPersonSchema])
+@router.get(path="/search", response_model=list[OutputPersonSchema])
 @cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def person_search(
     query: str,
     pagination: PaginateModel = Depends(parse_pagination),
     person_service: PersonService = Depends(get_person_service),
-) -> List[OutputPersonSchema]:
+) -> list[OutputPersonSchema]:
 
     persons = await person_service.get_list(
         query=query,
@@ -63,12 +61,12 @@ async def person_detail(
 
 @router.get(
     path="/{person_id:uuid}/film",
-    response_model=List[OutputMovieMinimalisticSchema],
+    response_model=list[OutputMovieMinimalisticSchema],
 )
 @cache(expire=CACHE_EXPIRE_IN_SECONDS)
 async def person_films(
     person_id: UUID4, movie_service: MovieService = Depends(get_movie_service)
-) -> List[OutputMovieMinimalisticSchema]:
+) -> list[OutputMovieMinimalisticSchema]:
     movies = await movie_service.get_list_by_person_id(person_id)
 
     return [OutputMovieMinimalisticSchema.from_es_model(movie) for movie in movies]

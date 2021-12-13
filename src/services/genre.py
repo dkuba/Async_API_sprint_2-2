@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Optional
 
 import elasticsearch.exceptions
 from aioredis import Redis
@@ -24,7 +24,7 @@ class GenreService:
 
         return Genre(**doc["_source"])
 
-    async def get_list(self, page: Optional[dict] = None) -> List[Genre]:
+    async def get_list(self, page: Optional[dict] = None) -> list[Genre]:
         page_size = 50
         page_number = 1
         if page:

@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Optional
 
 import elasticsearch.exceptions
 from aioredis import Redis
@@ -33,7 +33,7 @@ class MovieService:
         page: Optional[dict] = None,
         filters: Optional[dict] = None,
         sort: Optional[dict] = None,
-    ) -> List[Movie]:
+    ) -> list[Movie]:
         request_query = {}
         if query:
             request_query = {"multi_match": {"query": query, "fields": ["title"]}}
@@ -73,7 +73,7 @@ class MovieService:
 
         return [Movie(**doc["_source"]) for doc in response["hits"]["hits"]]
 
-    async def get_list_by_person_id(self, person_id: str) -> List[Movie]:
+    async def get_list_by_person_id(self, person_id: str) -> list[Movie]:
         response = await self.elastic.search(
             body={
                 "query": {

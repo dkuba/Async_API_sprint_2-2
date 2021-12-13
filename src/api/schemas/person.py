@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import UUID4
 
 from api.schemas.base import BaseAPISchema
@@ -19,7 +17,7 @@ class OutputPersonSchema(BaseAPISchema):
 
     uuid: UUID4
     full_name: str
-    films: List[OutputMoviePersonRoleMinimalisticSchema]
+    films: list[OutputMoviePersonRoleMinimalisticSchema]
 
     @classmethod
     def from_es_model(cls, person: Person):

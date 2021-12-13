@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import UUID4
 
 from api.schemas.base import BaseAPISchema
@@ -21,10 +19,10 @@ class OutputMovieSchema(BaseAPISchema):
     title: str
     imdb_rating: float
     description: str
-    genres: List[OutputGenreMinimalisticSchema]
-    actors: List[OutputPersonMinimalisticSchema]
-    writers: List[OutputPersonMinimalisticSchema]
-    directors: List[OutputPersonMinimalisticSchema]
+    genres: list[OutputGenreMinimalisticSchema]
+    actors: list[OutputPersonMinimalisticSchema]
+    writers: list[OutputPersonMinimalisticSchema]
+    directors: list[OutputPersonMinimalisticSchema]
 
     @classmethod
     def from_es_model(cls, movie: Movie):
